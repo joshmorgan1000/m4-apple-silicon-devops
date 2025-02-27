@@ -1,0 +1,6 @@
+apiVersion: v2
+name: jenkins-chart
+description: "Helm chart to deploy a Jenkins x86 master & an arm64 agent with shared storage"
+type: application
+version: 0.1.0
+appVersion: "2025.02.26"

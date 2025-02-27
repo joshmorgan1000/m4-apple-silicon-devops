@@ -1,0 +1,52 @@
+{{- if .Values.jenkinsAgent.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.jenkinsAgent.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.jenkinsAgent.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.jenkinsAgent.name }}
+    spec:
+      containers:
+        - name: {{ .Values.jenkinsAgent.name }}
+          image: {{ .Values.jenkinsAgent.image }}
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: {{ .Values.jenkinsAgent.containerPort }}
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+          resources:
+            limits:
+              memory: {{ .Values.jenkinsAgent.memoryLimit }}
+              cpu: {{ .Values.jenkinsAgent.cpuLimit }}
+            requests:
+              memory: {{ .Values.jenkinsAgent.memoryRequest }}
+              cpu: {{ .Values.jenkinsAgent.cpuRequest }}
+          env:
+            - name: JENKINS_URL
+              value: {{ .Values.jenkinsAgent.jenkinsUrl }}
+            - name: JENKINS_AGENT_NAME
+              value: {{ .Values.jenkinsAgent.agentName }}
+            - name: JENKINS_AGENT_SECRET
+              value: {{ .Values.jenkinsAgent.agentSecret }}
+          volumeMounts:
+            - name: jenkins-storage
+              mountPath: /root/.jenkins
+            - name: shared
+              mountPath: /mnt/shared
+      volumes:
+        - name: jenkins-storage
+          persistentVolumeClaim:
+            claimName: jenkins-arm64-pvc
+        - name: shared
+          persistentVolumeClaim:
+            claimName: shared-pvc
+{{- end }}

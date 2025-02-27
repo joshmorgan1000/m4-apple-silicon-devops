@@ -1,0 +1,11 @@
+FROM --platform=linux/amd64 ubuntu:22.04
+USER root
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Install minimal tools
+RUN apt-get update && apt-get install -y \
+    bash nano curl netcat iputils-ping && \
+    rm -rf /var/lib/apt/lists/*
+
+# Idle forever
+CMD ["tail", "-f", "/dev/null"]

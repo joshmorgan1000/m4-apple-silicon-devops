@@ -1,0 +1,16 @@
+{{- if .Values.jenkinsMaster.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.jenkinsMaster.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  type: NodePort
+  selector:
+    app: {{ .Values.jenkinsMaster.name }}
+  ports:
+    - name: http
+      port: {{ .Values.jenkinsMaster.servicePort }}
+      targetPort: {{ .Values.jenkinsMaster.servicePort }}
+      nodePort: {{ .Values.jenkinsMaster.nodePort }}
+{{- end }}

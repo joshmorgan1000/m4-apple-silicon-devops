@@ -1,0 +1,93 @@
+# Only create them if .Values.jenkinsMaster.enabled or .Values.jenkinsAgent.enabled is true
+---
+{{- if .Values.jenkinsMaster.enabled }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jenkins-x86-pv
+spec:
+  capacity:
+    storage: "200Gi"
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage
+  hostPath:
+    path: {{ printf "%s/jenkins.x86" .Values.rootStoragePath }}
+  persistentVolumeReclaimPolicy: Retain
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jenkins-x86-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: "2Gi"
+  storageClassName: local-storage
+  volumeName: jenkins-x86-pv
+{{- end }}
+
+---
+{{- if .Values.jenkinsAgent.enabled }}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: jenkins-arm64-pv
+spec:
+  capacity:
+    storage: "200Gi"
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage
+  hostPath:
+    path: {{ printf "%s/jenkins.arm64" .Values.rootStoragePath }}
+  persistentVolumeReclaimPolicy: Retain
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: jenkins-arm64-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: "2Gi"
+  storageClassName: local-storage
+  volumeName: jenkins-arm64-pv
+{{- end }}
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: shared-pv
+spec:
+  capacity:
+    storage: 200Gi
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-storage
+  hostPath:
+    path: {{ printf "%s/shared" .Values.rootStoragePath }}
+  persistentVolumeReclaimPolicy: Retain
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: shared-pvc
+  namespace: {{ .Values.namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi
+  storageClassName: local-storage
+  volumeName: shared-pv

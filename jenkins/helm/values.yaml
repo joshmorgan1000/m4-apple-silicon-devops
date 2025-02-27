@@ -1,0 +1,27 @@
+namespace: jenkins
+
+rootStoragePath: "${DEVOPS_STORAGE_PATH}"
+
+jenkinsMaster:
+  enabled: true
+  name: jenkins-x86
+  image: "localhost:30050/jenkins-x86:latest"
+  servicePort: 8080
+  nodePort: 30082
+  memoryLimit: "8Gi"
+  cpuLimit: 4
+  memoryRequest: "1Gi"
+  cpuRequest: 1
+
+jenkinsAgent:
+  enabled: true
+  name: jenkins-arm64
+  image: "localhost:30050/jenkins-arm64:latest"
+  jenkinsUrl: http://jenkins-x86.jenkins.svc.cluster.local:8080/
+  agentName: "jenkins-arm64"
+  agentSecret: "SUPER_SECRET"
+  containerPort: 50000
+  memoryLimit: "8Gi"
+  cpuLimit: 4
+  memoryReques: "1Gi"
+  cpuRequest: 1

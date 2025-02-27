@@ -1,0 +1,48 @@
+{{- if .Values.jenkinsMaster.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.jenkinsMaster.name }}
+  namespace: {{ .Values.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.jenkinsMaster.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.jenkinsMaster.name }}
+    spec:
+      containers:
+        - name: {{ .Values.jenkinsMaster.name }}
+          image: {{ .Values.jenkinsMaster.image }}
+          imagePullPolicy: Always
+          ports:
+            - name: web
+              containerPort: {{ .Values.jenkinsMaster.servicePort }}
+            - name: agent
+              containerPort: 50000
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+          resources:
+            limits:
+              memory: {{ .Values.jenkinsMaster.memoryLimit }}
+              cpu: {{ .Values.jenkinsMaster.cpuLimit }}
+            requests:
+              memory: {{ .Values.jenkinsMaster.memoryRequest }}
+              cpu: {{ .Values.jenkinsMaster.cpuRequest }}
+          volumeMounts:
+            - name: jenkins-storage
+              mountPath: /root/.jenkins
+            - name: shared
+              mountPath: /mnt/shared
+      volumes:
+        - name: jenkins-storage
+          persistentVolumeClaim:
+            claimName: jenkins-x86-pvc
+        - name: shared
+          persistentVolumeClaim:
+            claimName: shared-pvc
+{{- end }}
