@@ -1,4 +1,5 @@
 # Only create them if .Values.jenkinsMaster.enabled or .Values.jenkinsAgent.enabled is true
+{{- $rootStoragePath := required "Set rootStoragePath to your storage directory before installing Jenkins" .Values.rootStoragePath }}
 ---
 {{- if .Values.jenkinsMaster.enabled }}
 apiVersion: v1
@@ -12,7 +13,7 @@ spec:
     - ReadWriteOnce
   storageClassName: local-storage
   hostPath:
-    path: {{ printf "%s/jenkins.x86" .Values.rootStoragePath }}
+    path: {{ printf "%s/jenkins.x86" $rootStoragePath | quote }}
   persistentVolumeReclaimPolicy: Retain
 
 ---
@@ -44,7 +45,7 @@ spec:
     - ReadWriteOnce
   storageClassName: local-storage
   hostPath:
-    path: {{ printf "%s/jenkins.arm64" .Values.rootStoragePath }}
+    path: {{ printf "%s/jenkins.arm64" $rootStoragePath | quote }}
   persistentVolumeReclaimPolicy: Retain
 
 ---
@@ -74,7 +75,7 @@ spec:
     - ReadWriteOnce
   storageClassName: local-storage
   hostPath:
-    path: {{ printf "%s/shared" .Values.rootStoragePath }}
+    path: {{ printf "%s/shared" $rootStoragePath | quote }}
   persistentVolumeReclaimPolicy: Retain
 
 ---

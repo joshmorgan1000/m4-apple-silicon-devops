@@ -10,7 +10,7 @@ spec:
   persistentVolumeReclaimPolicy: Retain
   storageClassName: local-storage
   hostPath:
-    path: "${DEVOPS_STORAGE_PATH}" 
+    path: "${DEVOPS_STORAGE_PATH}"
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

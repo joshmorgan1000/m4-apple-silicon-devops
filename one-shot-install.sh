@@ -10,16 +10,18 @@ if [ ! -d "$3" ]; then
     echo "ERROR: $3 is not a valid directory."
     exit 1
 fi
-mkdir -p $3/docker
-mkdir -p $3/git-service
-mkdir -p $3/jenkins.arm64
-mkdir -p $3/jenkins.x86
-mkdir -p $3/shared
+DEVOPS_STORAGE_PATH="$(cd "$3" && pwd -P)" || exit 1
+export DEVOPS_STORAGE_PATH
+mkdir -p "$DEVOPS_STORAGE_PATH/docker"
+mkdir -p "$DEVOPS_STORAGE_PATH/git-service"
+mkdir -p "$DEVOPS_STORAGE_PATH/jenkins.arm64"
+mkdir -p "$DEVOPS_STORAGE_PATH/jenkins.x86"
+mkdir -p "$DEVOPS_STORAGE_PATH/shared"
 
 # 2. Deploy Local Registry and create storage directories
 echo "Deploying Local Docker Registry..."
 cd registry
-kubectl apply -f docker-registry-config.yaml
+envsubst '${DEVOPS_STORAGE_PATH}' < docker-registry-config.yaml | kubectl apply -f -
 cd ..
 
 # 3. Deploy The Local Git Service
@@ -27,7 +29,7 @@ echo "Deploying Local Git Service..."
 cd git-service
 docker build -t localhost:30050/git-service:latest .
 docker push localhost:30050/git-service:latest
-kubectl apply -f git-pv.yaml
+envsubst '${DEVOPS_STORAGE_PATH}' < git-pv.yaml | kubectl apply -f -
 kubectl apply -f git-deployment.yaml
 kubectl apply -f git-service.yaml
 # Wait for the service to be ready
@@ -43,7 +45,7 @@ if [ -z "$GITEA_POD" ]; then
 fi
 # Generate bcrypt hash of the password dynamically
 BCRYPT_HASH=$(kubectl exec -n $NAMESPACE $GITEA_POD -- \
-    htpasswd -bnBC 10 "" "$1" | tr -d ':\n'
+    htpasswd -bnBC 10 "" "$1" | tr -d ':\n')
 if [ -z "$BCRYPT_HASH" ]; then
     echo "ERROR: Failed to generate bcrypt hash for git password."
     exit 1
@@ -111,7 +113,7 @@ argocd app create jenkins \
   --revision main \
   --helm-set jenkinsMaster.enabled=true \
   --helm-set jenkinsAgent.enabled=false \
-  --helm-set rootStoragePath=$3 \
+  --helm-set "rootStoragePath=$DEVOPS_STORAGE_PATH" \
   --sync-policy automated
 # Wait until the $3/jenkins.x86/secret.key file is created
 while [ ! -f "$3/jenkins.x86/secret.key" ]; do

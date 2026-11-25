@@ -1,6 +1,6 @@
 namespace: jenkins
 
-rootStoragePath: "${DEVOPS_STORAGE_PATH}"
+rootStoragePath: ""
 
 jenkinsMaster:
   enabled: true
